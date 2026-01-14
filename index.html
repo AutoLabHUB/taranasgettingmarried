@@ -33,7 +33,7 @@
             overflow-x:hidden;
         }
 
-        /* Background video + overlay image (FIXED) */
+        /* Background video + overlay image */
         .bgVideo{
             position:fixed;
             inset:0;
@@ -58,7 +58,9 @@
             object-fit:cover;
             pointer-events:none;
             z-index:1;
-            opacity:50;
+
+            /* ✅ FIX: opacity must be 0..1 (not 50) */
+            opacity:0.5;
             mix-blend-mode: soft-light;
         }
 
@@ -82,8 +84,6 @@
             transform: translateY(10px);
             opacity:0;
             animation: in .85s cubic-bezier(.2,.9,.2,1) forwards;
-
-            /* keep card glassy but transparent */
             background: transparent;
             border: 0;
         }
@@ -101,8 +101,6 @@
             align-items:center;
             justify-content:center;
             overflow:hidden;
-
-            /* transparent as requested */
             background: transparent;
         }
 
@@ -112,17 +110,17 @@
             display:flex;
             flex-direction:column;
             align-items:center;
-            justify-content:center; /* centers vertically within left panel */
+            justify-content:center;
             gap: 0;
         }
 
         .names{
-            margin: 0 0 8px; /* remove top push so true centering */
+            margin: 0 0 8px;
             font-family: "Cormorant Garamond", serif;
             font-weight: 500;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            font-size: clamp(58px, 6.7vw, 94px);
+            font-size: clamp(60px, 6.8vw, 96px);
             line-height: 1;
             color: rgba(29,39,33,.86);
         }
@@ -162,13 +160,6 @@
             text-align:center;
         }
 
-        .actions{
-            margin-top: 18px;
-            display:flex;
-            gap:10px;
-            justify-content:center;
-            flex-wrap:wrap;
-        }
         .btn{
             appearance:none;
             border:1px solid rgba(47,122,87,.22);
@@ -191,21 +182,26 @@
             background: rgba(47,122,87,.14);
             border-color: rgba(47,122,87,.34);
         }
+        .btn[disabled]{
+            opacity:.7;
+            cursor:not-allowed;
+            transform:none !important;
+            box-shadow:none !important;
+        }
 
-        /* Right panel - center the form vertically and horizontally */
+        /* Right panel */
         .panel{
             padding: clamp(18px, 3.5vw, 34px);
-            background: transparent; /* requested */
-            border: 0;              /* remove separator */
-
+            background: transparent;
+            border: 0;
             display:flex;
-            align-items:center;     /* vertical center within panel */
-            justify-content:center; /* horizontal center within panel */
-            min-height: 520px;      /* match left panel height for perfect centering */
+            align-items:center;
+            justify-content:center;
+            min-height: 520px;
         }
         @media (max-width: 900px){
             .panel{
-                min-height: auto;           /* avoid tall empty space on mobile */
+                min-height: auto;
                 padding-top: 24px;
                 padding-bottom: 28px;
             }
@@ -265,18 +261,36 @@
             background: rgba(47,122,87,.11);
         }
 
+        /* ✅ Toast OUTSIDE the form (so it remains visible after hiding the form) */
         .toast{
             display:none;
-            padding: 12px 12px;
-            border-radius: 16px;
-            border: 1px solid rgba(47,122,87,.22);
-            background: rgba(47,122,87,.10);
-            color: rgba(29,39,33,.86);
-            font-size: 13px;
-            line-height: 1.5;
+            margin-top: 14px;
+            padding: 22px 22px;
+            border-radius: 22px;
+            color: #1d2721;
+            text-align: center;
+            white-space: pre-line;
+            font-family: "Cormorant Garamond", serif;
+            font-size: 18px;
+            line-height: 1.7;
+            letter-spacing: .02em;
+            animation: toastPop .38s ease-out forwards;
+        }
+        .toastTitle{
+            display:block;
+            font-family: "Cormorant Garamond", serif;
+            font-weight: 600;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: rgba(29,39,33,.88);
+        }
+        @keyframes toastPop {
+            from { opacity: 0; transform: translateY(10px) scale(.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* Reduced motion */
         @media (prefers-reduced-motion: reduce){
             .card{ animation:none; opacity:1; transform:none; }
         }
@@ -284,17 +298,11 @@
 </head>
 
 <body>
-<!-- Video background + overlay image (correct structure) -->
 <div class="bgVideo" aria-hidden="true">
     <video autoplay muted loop playsinline preload="auto">
         <source src="https://video.wixstatic.com/video/f71431_aee48663d58644239f1e6626816ff07d/1080p/mp4/file.mp4" type="video/mp4">
     </video>
-
-    <img
-            class="bgOverlay"
-            src="https://static.wixstatic.com/media/f71431_ae3c49ee7741481eb55611c1e45d7cb2~mv2.png"
-            alt=""
-    >
+    <img class="bgOverlay" src="https://static.wixstatic.com/media/f71431_ae3c49ee7741481eb55611c1e45d7cb2~mv2.png" alt="">
 </div>
 
 <main class="wrap">
@@ -303,8 +311,10 @@
 
             <div class="invite">
                 <div class="content">
+                    <div class="sub">SAVE THE DATE</div>
+
                     <div class="names">TARA</div>
-                    <div class="date">&</div>
+                    <div class="date">&amp;</div>
                     <div class="names">NASSER</div>
                     <div class="sub">are getting married</div>
 
@@ -315,91 +325,124 @@
                     <div class="date">2026</div>
 
                     <div class="fine">formal invitation to follow</div>
-
-
                     <div class="fine" style="margin-top:14px;">tara’s number is 0402 748 120</div>
                 </div>
             </div>
 
             <aside class="panel" id="rsvp">
                 <div class="panelInner">
-                    <h2>RSVP</h2>
-                    <p>Please provide your contact details and <strong>mailing address</strong>.</p>
 
-                    <form id="rsvpForm" autocomplete="on">
-                        <div class="row">
-                            <div>
-                                <label for="fullName">Your name</label>
-                                <input id="fullName" name="fullName" required>
-                            </div>
+                        <!-- Title + intro (hidden on success) -->
+                        <h2 id="rsvpTitle">RSVP</h2>
+                        <p id="rsvpIntro">
+                            Please provide your contact details and <strong>mailing address</strong>.
+                        </p>
+
+                        <!-- Body wrapper -->
+                        <div id="rsvpBody">
+
+                            <!-- RSVP FORM -->
+                            <form id="rsvpForm" autocomplete="on">
+
+                                <div class="row">
+                                    <div>
+                                        <label for="fullName">Your name</label>
+                                        <input id="fullName" name="fullName" required>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div>
+                                        <label for="email">Email (optional)</label>
+                                        <input id="email" name="email" type="email">
+                                    </div>
+                                    <div>
+                                        <label for="attending">Will you attend?</label>
+                                        <select id="attending" name="attending" required>
+                                            <option value="Yes">Yes</option>
+                                            <option value="No">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="address">Mailing address</label>
+                                    <textarea id="address" name="address" required></textarea>
+                                </div>
+
+                                <div class="row">
+                                    <div>
+                                        <label for="guests">Guests (including you)</label>
+                                        <select id="guests" name="guests" required>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="note">Message (optional)</label>
+                                        <input id="note" name="note">
+                                    </div>
+                                </div>
+
+                                <button class="btn btnPrimary" id="submitBtn" type="submit">
+                                    Submit RSVP
+                                </button>
+
+                            </form>
+
+                            <!-- SUCCESS MESSAGE (shown only after successful RSVP) -->
+                            <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
                         </div>
+                    </div>
 
-                        <div class="row">
-                            <div>
-                                <label for="email">Email (optional)</label>
-                                <input id="email" name="email" type="email">
-                            </div>
-                            <div>
-                                <label for="attending">Will you attend?</label>
-                                <select id="attending" name="attending" required>
-                                    <option value="Yes">Yes</option>
-                                    <option value="No">No</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="address">Mailing address</label>
-                            <textarea id="address" name="address" required></textarea>
-                        </div>
-
-                        <div class="row">
-                            <div>
-                                <label for="guests">Guests (including you)</label>
-                                <select id="guests" name="guests" required>
-                                    <option>1</option><option>2</option><option>3</option><
-                                </select>
-                            </div>
-                            <div>
-                                <label for="note">Message (optional)</label>
-                                <input id="note" name="note">
-                            </div>
-                        </div>
-
-                        <button class="btn btnPrimary" type="submit">Submit RSVP</button>
-                        <div class="toast" id="toast" role="status" aria-live="polite"></div>
-                    </form>
-                </div>
             </aside>
 
         </div>
     </section>
 </main>
+
 <script>
     const ENDPOINT = "https://script.google.com/macros/s/AKfycbz1KoPdsK6bA763d6N3UOp-k3tB6xhdI2_Mj0MvE5Bw_gNWLySV_IT3w3qRhnRJCK1_GA/exec";
 
     const form = document.getElementById('rsvpForm');
     const toastEl = document.getElementById('toast');
+    const submitBtn = document.getElementById('submitBtn');
 
-    function toast(msg, ok=true){
+    function showSuccessToast(){
+        // Hide heading and helper text
+        const title = document.getElementById('rsvpTitle');
+        const intro = document.getElementById('rsvpIntro');
+        if (title) title.style.display = 'none';
+        if (intro) intro.style.display = 'none';
+
+        // Hide form only after success
+        form.style.display = 'none';
+
+        // Show prominent success card
+        toastEl.innerHTML =
+            '<span class="toastTitle">RSVP SUBMITTED</span>' +
+            'We are so excited to celebrate with you on our special day.';
         toastEl.style.display = 'block';
-        toastEl.style.borderColor = ok ? 'rgba(47,122,87,.22)' : 'rgba(160,30,30,.22)';
-        toastEl.style.background = ok ? 'rgba(47,122,87,.10)' : 'rgba(255,230,230,.75)';
-        toastEl.textContent = msg;
-        clearTimeout(window.__t);
-        window.__t = setTimeout(()=> toastEl.style.display='none', 5200);
     }
 
-    // Only attach if button exists
-    const scrollBtn = document.getElementById('scrollRsvp');
-    if (scrollBtn) {
-        scrollBtn.addEventListener('click', () => {
-            document.getElementById('rsvp').scrollIntoView({behavior:'smooth', block:'start'});
-        });
+    function showErrorToast(msg){
+        toastEl.style.display = 'block';
+        toastEl.style.borderColor = 'rgba(160,30,30,.35)';
+        toastEl.style.background = 'rgba(255,230,230,.92)';
+        toastEl.textContent = msg;
     }
 
     form.addEventListener('submit', async (e)=>{
         e.preventDefault();
+
+        // clear any prior error toast style if visible
+        toastEl.style.display = 'none';
+        toastEl.innerHTML = '';
+        toastEl.textContent = '';
 
         const fd = new FormData(form);
         const payload = {
@@ -414,9 +457,13 @@
         };
 
         if(!payload.fullName || !payload.address){
-            toast("Please add your name and mailing address.", false);
+            showErrorToast("Please add your name and mailing address.");
             return;
         }
+
+        // Prevent double submits
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
 
         try {
             const res = await fetch(ENDPOINT, {
@@ -431,18 +478,22 @@
             try { data = JSON.parse(raw); } catch(e) {}
 
             if (data && data.ok === true) {
-                toast("RSVP submitted. Thank you!");
                 form.reset();
+                showSuccessToast();
             } else {
-                toast("Submission failed. Please try again.", false);
+                showErrorToast("Submission failed. Please try again.");
                 console.warn("RSVP response:", raw);
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Submit RSVP";
             }
         } catch (err) {
-            toast("Submission error. Please try again.", false);
+            showErrorToast("Submission error. Please try again.");
             console.error(err);
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit RSVP";
         }
     });
 </script>
-
 </body>
 </html>
+
